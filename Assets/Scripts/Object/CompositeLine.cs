@@ -18,4 +18,23 @@ public class CompositeLine : BaseObject
         }
         return pts;
     }
+
+    // 设置轮廓点集，按顺序设置各段的起点和终点
+    public void SetContourPoints(List<Vector3> points)
+    {
+        segments.Clear();
+        if (points == null || points.Count < 2) return;
+
+        for (int i = 0; i < points.Count; i++)
+        {
+            var a = points[i];
+            var b = (i == points.Count - 1) ? points[0] : points[i + 1];
+            var segGo = new GameObject($"Segment_{i}");
+            segGo.transform.SetParent(this.transform, worldPositionStays: true);
+            var seg = segGo.AddComponent<SegmentObject>();
+            seg.startPoint = a;
+            seg.endPoint = b;
+            segments.Add(seg);
+        }
+    }
 }

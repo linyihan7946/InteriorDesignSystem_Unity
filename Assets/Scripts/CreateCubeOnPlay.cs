@@ -4,7 +4,7 @@ public static class CreateCubeOnPlay
 {
     private const string CubeName = "AutoCreatedCube";
 
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    // [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void OnRuntimeLoaded()
     {
         if (!Application.isPlaying)
