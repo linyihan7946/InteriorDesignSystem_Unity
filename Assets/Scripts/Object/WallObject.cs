@@ -18,7 +18,7 @@ public class WallObject : BaseObject
     public override void Rebuild()
     {
         // 删除已有墙体网格
-        var existing = transform.Find("WallMesh");
+        var existing = transform.Find(this.ObjectName);
         if (existing != null) UnityEngine.Object.DestroyImmediate(existing.gameObject);
         
         if (centerLine == null) return;
@@ -38,7 +38,7 @@ public class WallObject : BaseObject
             new Vector3(p1.x + perp.x, p1.y, p1.z + perp.z)
         };
         
-        var wallGo = ModelingUtility.CreateExtrudedPolygon("WallMesh", poly, height, this.transform);
+        var wallGo = ModelingUtility.CreateExtrudedPolygon(this.ObjectName, poly, height, this.transform);
         if (wallGo != null)
         {
             // 将墙体底部对齐到 centerLine 的 y 位置 (centerLine.startPoint.y)
