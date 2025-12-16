@@ -259,6 +259,140 @@ public static class ModelingUtility
         return go;
     }
 
+    // 支持多个内孔的多边形平面（outer 为外圈，holes 为内圈列表，均为 XZ 平面坐标）
+    public static GameObject CreatePolygonPlaneWithHoles(string name, List<Vector3> outer, List<List<Vector3>> holes, Transform parent = null)
+    {
+        if (outer == null || outer.Count < 3) return null;
+
+        // copy outer
+        var merged = new List<Vector3>(outer);
+
+        if (holes != null)
+        {
+            foreach (var hole in holes)
+            {
+                if (hole == null || hole.Count < 3) continue;
+
+                // find hole's rightmost point index
+                int hr = 0;
+                for (int i = 1; i < hole.Count; i++) if (hole[i].x > hole[hr].x) hr = i;
+                var H = hole[hr];
+
+                // find visible vertex on merged (outer + already-merged holes)
+                int visibleIndex = -1;
+                for (int vi = 0; vi < merged.Count; vi++)
+                {
+                    var V = merged[vi];
+                    if (IsSegmentIntersectingPolygons(H, V, merged, hole)) continue;
+                    // midpoint inside outer?
+                    var mid = new Vector3((H.x + V.x) * 0.5f, 0f, (H.z + V.z) * 0.5f);
+                    if (!PointInPolygonXZ(mid, outer)) continue;
+                    visibleIndex = vi;
+                    break;
+                }
+
+                if (visibleIndex == -1)
+                {
+                    // fallback: pick nearest outer vertex by distance
+                    float bestDist = float.MaxValue;
+                    for (int vi = 0; vi < merged.Count; vi++)
+                    {
+                        var d = Vector2.SqrMagnitude(new Vector2(merged[vi].x - H.x, merged[vi].z - H.z));
+                        if (d < bestDist) { bestDist = d; visibleIndex = vi; }
+                    }
+                }
+
+                // splice hole into merged at visibleIndex: V -> H -> hole vertices (starting from hr) -> H -> V
+                var spliced = new List<Vector3>();
+                for (int i = 0; i <= visibleIndex; i++) spliced.Add(merged[i]);
+                // add bridge to hole
+                spliced.Add(H);
+                for (int k = 0; k < hole.Count; k++) spliced.Add(hole[(hr + 1 + k) % hole.Count]);
+                // add bridge back
+                spliced.Add(H);
+                for (int i = visibleIndex + 1; i < merged.Count; i++) spliced.Add(merged[i]);
+
+                merged = spliced;
+            }
+        }
+
+        // triangulate merged polygon
+        var tris = TriangulatePolygon(merged);
+        if (tris == null || tris.Count == 0) return null;
+
+        var go = new GameObject(string.IsNullOrEmpty(name) ? "PolygonPlaneWithHoles" : name);
+        if (parent != null) go.transform.SetParent(parent, worldPositionStays: true);
+        var mesh = new Mesh();
+        mesh.vertices = merged.ToArray();
+        mesh.triangles = tris.ToArray();
+        mesh.RecalculateNormals();
+
+        var mf = go.AddComponent<MeshFilter>();
+        mf.sharedMesh = mesh;
+        var mr = go.AddComponent<MeshRenderer>();
+        mr.sharedMaterial = GetDefaultMaterial();
+
+        return go;
+    }
+
+    // 判断线段 H-V 是否与 outerPolygon 或 holePolygon 的任何边相交（忽略端点相连情况）
+    private static bool IsSegmentIntersectingPolygons(Vector3 a3, Vector3 b3, List<Vector3> outerPoly, List<Vector3> holePoly)
+    {
+        var a = new Vector2(a3.x, a3.z);
+        var b = new Vector2(b3.x, b3.z);
+
+        // check outer
+        for (int i = 0; i < outerPoly.Count; i++)
+        {
+            var p0 = new Vector2(outerPoly[i].x, outerPoly[i].z);
+            var p1 = new Vector2(outerPoly[(i + 1) % outerPoly.Count].x, outerPoly[(i + 1) % outerPoly.Count].z);
+            if (SegmentsIntersectStrict(a, b, p0, p1)) return true;
+        }
+        // check hole
+        for (int i = 0; i < holePoly.Count; i++)
+        {
+            var p0 = new Vector2(holePoly[i].x, holePoly[i].z);
+            var p1 = new Vector2(holePoly[(i + 1) % holePoly.Count].x, holePoly[(i + 1) % holePoly.Count].z);
+            if (SegmentsIntersectStrict(a, b, p0, p1)) return true;
+        }
+        return false;
+    }
+
+    private static bool SegmentsIntersectStrict(Vector2 a, Vector2 b, Vector2 c, Vector2 d)
+    {
+        // exclude cases where segments share endpoints by returning false
+        if ((a == c) || (a == d) || (b == c) || (b == d)) return false;
+        return SegmentsIntersect(a, b, c, d);
+    }
+
+    private static bool SegmentsIntersect(Vector2 a, Vector2 b, Vector2 c, Vector2 d)
+    {
+        float s1_x = b.x - a.x; float s1_y = b.y - a.y;
+        float s2_x = d.x - c.x; float s2_y = d.y - c.y;
+
+        float s = (-s1_y * (a.x - c.x) + s1_x * (a.y - c.y)) / (-s2_x * s1_y + s1_x * s2_y + 1e-9f);
+        float t = ( s2_x * (a.y - c.y) - s2_y * (a.x - c.x)) / (-s2_x * s1_y + s1_x * s2_y + 1e-9f);
+
+        return (s >= 0 && s <= 1 && t >= 0 && t <= 1);
+    }
+
+    // 点是否在多边形内（XZ 平面）
+    private static bool PointInPolygonXZ(Vector3 p3, List<Vector3> poly)
+    {
+        var p = new Vector2(p3.x, p3.z);
+        var pts = new List<Vector2>(poly.Count);
+        for (int i = 0; i < poly.Count; i++) pts.Add(new Vector2(poly[i].x, poly[i].z));
+
+        bool inside = false;
+        for (int i = 0, j = pts.Count - 1; i < pts.Count; j = i++)
+        {
+            if (((pts[i].y > p.y) != (pts[j].y > p.y)) &&
+                (p.x < (pts[j].x - pts[i].x) * (p.y - pts[i].y) / (pts[j].y - pts[i].y + 1e-9f) + pts[i].x))
+                inside = !inside;
+        }
+        return inside;
+    }
+
     // 将多边形沿 Y 轴拉伸为实体（棱柱），返回包含网格的 GameObject
     public static GameObject CreateExtrudedPolygon(string name, List<Vector3> polygon, float height, Transform parent = null)
     {
