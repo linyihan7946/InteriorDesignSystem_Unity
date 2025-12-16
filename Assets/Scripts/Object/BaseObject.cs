@@ -50,6 +50,31 @@ public class BaseObject : MonoBehaviour
     }
 
     public Matrix4x4 Matrix2D { get => _matrix2D; set => _matrix2D = value; }
+
+    // 参数化构造（注意：Unity 在通过 AddComponent 创建组件时不会调用带参构造函数，
+    // 但这个构造函数可用于手工 new 时的初始化，建议优先使用静态工厂 CreateFromJson）
+    public BaseObject(string json = null)
+    {
+        if (!string.IsNullOrEmpty(json))
+        {
+            try { Deserialize(json); } catch { }
+        }
+        if (string.IsNullOrEmpty(_id)) _id = Guid.NewGuid().ToString();
+    }
+
+    // 通用静态工厂：创建 GameObject、添加组件并使用 json 初始化
+    public static T CreateFromJson<T>(string json = null, string name = null) where T : BaseObject
+    {
+        var go = new GameObject(string.IsNullOrEmpty(name) ? typeof(T).Name : name);
+        var comp = go.AddComponent<T>();
+        if (!string.IsNullOrEmpty(json))
+        {
+            comp.Deserialize(json);
+        }
+        // ensure id
+        if (string.IsNullOrEmpty(comp._id)) comp._id = Guid.NewGuid().ToString();
+        return comp;
+    }
     public Matrix4x4 Matrix3D { get => _matrix3D; set => _matrix3D = value; }
 
     // 为建模/更新提供的入口，派生类应覆写以创建或重建其可视化结构

@@ -9,4 +9,11 @@ public class FloorObject : BaseObject
     {
 
     }
+
+    public FloorObject(string json = null) : base(json) { }
+
+    public static FloorObject Create(string json = null, string name = null)
+    {
+        return CreateFromJson<FloorObject>(json, name);
+    }
 }

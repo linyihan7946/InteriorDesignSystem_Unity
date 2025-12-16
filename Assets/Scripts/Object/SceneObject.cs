@@ -12,4 +12,13 @@ public class SceneObject : BaseObject
             if (bo != null && bo != this) bo.Rebuild();
         }
     }
+
+    // 兼容带 json 的构造
+    public SceneObject(string json = null) : base(json) { }
+
+    // 便捷创建函数
+    public static SceneObject Create(string json = null, string name = null)
+    {
+        return CreateFromJson<SceneObject>(json, name);
+    }
 }

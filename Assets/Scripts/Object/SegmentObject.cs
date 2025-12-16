@@ -34,4 +34,11 @@ public class SegmentObject : BaseObject
             cyl.transform.localRotation = Quaternion.FromToRotation(Vector3.up, dir.normalized);
         }
     }
+
+    public SegmentObject(string json = null) : base(json) { }
+
+    public static SegmentObject Create(string json = null, string name = null)
+    {
+        return CreateFromJson<SegmentObject>(json, name);
+    }
 }

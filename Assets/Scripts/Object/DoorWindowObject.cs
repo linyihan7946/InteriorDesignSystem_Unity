@@ -18,4 +18,11 @@ public class DoorWindowObject : BaseObject
             // nothing else for now
         }
     }
+
+    public DoorWindowObject(string json = null) : base(json) { }
+
+    public static DoorWindowObject Create(string json = null, string name = null)
+    {
+        return CreateFromJson<DoorWindowObject>(json, name);
+    }
 }

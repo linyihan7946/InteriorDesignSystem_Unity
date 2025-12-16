@@ -85,4 +85,11 @@ public class PolygonPlane : BaseObject
             // keep as child
         }
     }
+
+    public PolygonPlane(string json = null) : base(json) { }
+
+    public static PolygonPlane Create(string json = null, string name = null)
+    {
+        return CreateFromJson<PolygonPlane>(json, name);
+    }
 }

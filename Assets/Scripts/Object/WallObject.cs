@@ -7,6 +7,13 @@ public class WallObject : BaseObject
     public float thickness = 120f;
     public float height = 2800f;
     public CompositeLine contour;
+
+    public WallObject(string json = null) : base(json) { }
+
+    public static WallObject Create(string json = null, string name = null)
+    {
+        return CreateFromJson<WallObject>(json, name);
+    }
     
     public override void Rebuild()
     {
@@ -37,6 +44,7 @@ public class WallObject : BaseObject
             // 将墙体底部对齐到 centerLine 的 y 位置 (centerLine.startPoint.y)
             wallGo.transform.localPosition = new Vector3(0f, 0f, 0f);
         }
+
     }
 
 }

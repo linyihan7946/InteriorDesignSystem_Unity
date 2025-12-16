@@ -64,4 +64,11 @@ public class CompositeLine : BaseObject
             segments.Add(seg);
         }
     }
+
+    public CompositeLine(string json = null) : base(json) { }
+
+    public static CompositeLine Create(string json = null, string name = null)
+    {
+        return CreateFromJson<CompositeLine>(json, name);
+    }
 }
