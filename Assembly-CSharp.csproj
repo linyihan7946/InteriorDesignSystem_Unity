@@ -64,8 +64,16 @@
     <Analyzer Include="C:\Program Files\Tuanjie\Hub\Editor\2022.3.61t9\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\Object\PolygonPlane.cs" />
+    <Compile Include="Assets\Scripts\Object\WallObject.cs" />
+    <Compile Include="Assets\Scripts\Object\CompositeLine.cs" />
     <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
+    <Compile Include="Assets\Scripts\Object\FloorObject.cs" />
     <Compile Include="Assets\Scripts\CreateCubeOnPlay.cs" />
+    <Compile Include="Assets\Scripts\Object\BaseObject.cs" />
+    <Compile Include="Assets\Scripts\Object\SceneObject.cs" />
+    <Compile Include="Assets\Scripts\Object\DoorWindowObject.cs" />
+    <Compile Include="Assets\Scripts\Object\SegmentObject.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
