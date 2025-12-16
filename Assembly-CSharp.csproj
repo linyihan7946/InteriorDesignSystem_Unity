@@ -67,6 +67,7 @@
     <Compile Include="Assets\Scripts\Object\PolygonPlane.cs" />
     <Compile Include="Assets\Scripts\Object\WallObject.cs" />
     <Compile Include="Assets\Scripts\Object\CompositeLine.cs" />
+    <Compile Include="Assets\Scripts\ModelingUtility.cs" />
     <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
     <Compile Include="Assets\Scripts\Object\FloorObject.cs" />
     <Compile Include="Assets\Scripts\CreateCubeOnPlay.cs" />
