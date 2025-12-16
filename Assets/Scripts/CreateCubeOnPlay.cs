@@ -16,5 +16,8 @@ public static class CreateCubeOnPlay
         var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
         cube.name = CubeName;
         cube.transform.position = Vector3.zero;
+
+
+        Debug.Log("Auto-created a cube at the origin.");
     }
 }
