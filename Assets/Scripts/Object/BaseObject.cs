@@ -52,6 +52,12 @@ public class BaseObject : MonoBehaviour
     public Matrix4x4 Matrix2D { get => _matrix2D; set => _matrix2D = value; }
     public Matrix4x4 Matrix3D { get => _matrix3D; set => _matrix3D = value; }
 
+    // 为建模/更新提供的入口，派生类应覆写以创建或重建其可视化结构
+    public virtual void Rebuild()
+    {
+        // 默认：不做任何操作
+    }
+
     public virtual string Serialize()
     {
         var wrapper = new SerializationWrapper

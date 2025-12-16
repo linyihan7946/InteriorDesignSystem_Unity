@@ -68,4 +68,21 @@ public class PolygonPlane : BaseObject
         if (index < 0 || index >= contours.Count) return null;
         return contours[index].GetContourPoints();
     }
+
+    public override void Rebuild()
+    {
+        var existing = transform.Find("PolygonPlaneMesh");
+        if (existing != null) UnityEngine.Object.DestroyImmediate(existing.gameObject);
+
+        if (contours == null || contours.Count == 0) return;
+        var outer = contours[0].GetContourPoints();
+        var holes = new List<List<Vector3>>();
+        for (int i = 1; i < contours.Count; i++) holes.Add(contours[i].GetContourPoints());
+
+        var go = ModelingUtility.CreatePolygonPlaneWithHoles("PolygonPlaneMesh", outer, holes, this.transform);
+        if (go != null)
+        {
+            // keep as child
+        }
+    }
 }

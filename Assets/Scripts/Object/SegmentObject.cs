@@ -15,4 +15,23 @@ public class SegmentObject : BaseObject
         // t: 0..1，线性插值；如果需要曲线，可扩展
         return Vector3.Lerp(startPoint, endPoint, Mathf.Clamp01(t));
     }
+
+    public override void Rebuild()
+    {
+        // 移除已有可视化
+        var exist = transform.Find("SegmentVisual");
+        if (exist != null) UnityEngine.Object.DestroyImmediate(exist.gameObject);
+
+        var mid = (startPoint + endPoint) * 0.5f;
+        var dir = endPoint - startPoint;
+        float len = dir.magnitude;
+        if (len <= 0.0001f) return;
+
+        var cyl = ModelingUtility.CreateCylinder("SegmentVisual", 0.02f, len, 12, this.transform);
+        if (cyl != null)
+        {
+            cyl.transform.localPosition = mid;
+            cyl.transform.localRotation = Quaternion.FromToRotation(Vector3.up, dir.normalized);
+        }
+    }
 }
