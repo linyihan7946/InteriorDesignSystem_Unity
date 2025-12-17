@@ -402,7 +402,7 @@ public static class ModelingUtility
 
         var top = new List<Vector3>(polygon.Count);
         for (int i = 0; i < polygon.Count; i++) 
-            top.Add(new Vector3(polygon[i].x, polygon[i].y, height));
+            top.Add(new Vector3(polygon[i].x, height, polygon[i].z));
 
         var verts = new List<Vector3>();
         var tris = new List<int>();
@@ -462,7 +462,7 @@ public static class ModelingUtility
 
         // 投影到 2D (x,y)
         var pts = new List<Vector2>(n);
-        for (int i = 0; i < n; i++) pts.Add(new Vector2(poly[i].x, poly[i].y));
+        for (int i = 0; i < n; i++) pts.Add(new Vector2(poly[i].x, poly[i].z));
 
         // 计算方向，确保为 CCW
         if (SignedArea(pts) < 0) pts.Reverse();

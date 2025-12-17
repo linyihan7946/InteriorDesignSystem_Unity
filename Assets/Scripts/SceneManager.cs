@@ -32,7 +32,7 @@ public static class SceneManager
             WallObject wall = WallObject.Create(null, "Wall_Left"); // 左
             wall.ObjectName = wall.Id;
             Vector3 start = new Vector3(0f, 0f, 0f);
-            Vector3 end = new Vector3(0f, 4000f, 0f);
+            Vector3 end = new Vector3(0f, 0f, 4000f);
             float thickness = 120f;
             float height = 3000f;
             wall.height = height;
@@ -41,15 +41,8 @@ public static class SceneManager
             wall.centerLine.startPoint = start;
             wall.centerLine.endPoint = end;
             wall.contour = CompositeLine.Create(null, "Contour_Left");
-            {
-                List<Vector3> pts = new List<Vector3>();
-                pts.Add(start - new Vector3(thickness / 2f, 0f, 0f));
-                pts.Add(start + new Vector3(thickness / 2f, 0f, 0f)); 
-                pts.Add(end + new Vector3(thickness / 2f, 0f, 0f));
-                pts.Add(end - new Vector3(thickness / 2f, 0f, 0f));
-                pts.Add(start - new Vector3(thickness / 2f, 0f, 0f));
-                wall.contour.SetContourPoints(pts);
-            }
+            List<Vector3> pts = GeometryUtils.CreateThickSegmentPolygon(start, end, thickness);
+            wall.contour.SetContourPoints(pts);
             wall.SetParent(floor);
             wall.Rebuild();
         }
@@ -57,7 +50,7 @@ public static class SceneManager
             WallObject wall = WallObject.Create(null, "Wall_Right");
             wall.ObjectName = wall.Id;
             Vector3 start = new Vector3(6000f, 0f, 0f);
-            Vector3 end = new Vector3(6000f, 4000f, 0f);
+            Vector3 end = new Vector3(6000f, 0f, 4000f);
             float thickness = 120f;
             float height = 3000f;
             wall.height = height;
@@ -66,23 +59,16 @@ public static class SceneManager
             wall.centerLine.startPoint = start;
             wall.centerLine.endPoint = end;
             wall.contour = CompositeLine.Create(null, "Contour_Right");
-            {
-                List<Vector3> pts = new List<Vector3>();
-                pts.Add(start - new Vector3(thickness / 2f, 0f, 0f));
-                pts.Add(start + new Vector3(thickness / 2f, 0f, 0f)); 
-                pts.Add(end + new Vector3(thickness / 2f, 0f, 0f));
-                pts.Add(end - new Vector3(thickness / 2f, 0f, 0f));
-                pts.Add(start - new Vector3(thickness / 2f, 0f, 0f));
-                wall.contour.SetContourPoints(pts);
-            }
+            List<Vector3> pts = GeometryUtils.CreateThickSegmentPolygon(start, end, thickness);
+            wall.contour.SetContourPoints(pts);
             wall.SetParent(floor);
             wall.Rebuild();
         }
         {// 上
             WallObject wall = WallObject.Create(null, "Wall_Top");// 上
             wall.ObjectName = wall.Id;
-            Vector3 start = new Vector3(0f, 4000f, 0f);
-            Vector3 end = new Vector3(6000f, 4000f, 0f);
+            Vector3 start = new Vector3(0f, 0f, 4000f);
+            Vector3 end = new Vector3(6000f, 0f, 4000f);
             float thickness = 120f;
             float height = 3000f;
             wall.height = height;
@@ -91,15 +77,8 @@ public static class SceneManager
             wall.centerLine.startPoint = start;
             wall.centerLine.endPoint = end;
             wall.contour = CompositeLine.Create(null, "Contour_Top");
-            {
-                List<Vector3> pts = new List<Vector3>();
-                pts.Add(start - new Vector3(0f, thickness / 2f, 0f));
-                pts.Add(start + new Vector3(0f, thickness / 2f, 0f)); 
-                pts.Add(end + new Vector3(0f, thickness / 2f, 0f));
-                pts.Add(end - new Vector3(0f, thickness / 2f, 0f));
-                pts.Add(start - new Vector3(0f, thickness / 2f, 0f));
-                wall.contour.SetContourPoints(pts);
-            }
+            List<Vector3> pts = GeometryUtils.CreateThickSegmentPolygon(start, end, thickness);
+            wall.contour.SetContourPoints(pts);
             wall.SetParent(floor);
             wall.Rebuild();
         }
@@ -116,15 +95,8 @@ public static class SceneManager
             wall.centerLine.startPoint = start;
             wall.centerLine.endPoint = end;
             wall.contour = CompositeLine.Create(null, "Contour_Bottom");
-            {
-                List<Vector3> pts = new List<Vector3>();
-                pts.Add(start - new Vector3(0f, thickness / 2f, 0f));
-                pts.Add(start + new Vector3(0f, thickness / 2f, 0f)); 
-                pts.Add(end + new Vector3(0f, thickness / 2f, 0f));
-                pts.Add(end - new Vector3(0f, thickness / 2f, 0f));
-                pts.Add(start - new Vector3(0f, thickness / 2f, 0f));
-                wall.contour.SetContourPoints(pts);
-            }
+            List<Vector3> pts = GeometryUtils.CreateThickSegmentPolygon(start, end, thickness);
+            wall.contour.SetContourPoints(pts);
             wall.SetParent(floor);
             wall.Rebuild();
         }

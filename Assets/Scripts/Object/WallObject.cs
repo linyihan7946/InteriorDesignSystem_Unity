@@ -31,20 +31,20 @@ public class WallObject : BaseObject
         var p0 = centerLine.startPoint;
         var p1 = centerLine.endPoint;
         var dir = p1 - p0;
-        Vector3 dirXY = new Vector3(dir.x, dir.y, 0f);
-        if (dirXY.sqrMagnitude < 1e-6f) return;
-        dirXY.Normalize();
+        Vector3 dirXZ = new Vector3(dir.x, 0f, dir.z);
+        if (dirXZ.sqrMagnitude < 1e-6f) return;
+        dirXZ.Normalize();
 
-        Matrix4x4 rotMatrix = Matrix4x4.Rotate(Quaternion.Euler(0, 0, 90));
-        Vector3 normal = rotMatrix.MultiplyVector(dirXY) * (thickness * 0.5f);
+        Matrix4x4 rotMatrix = Matrix4x4.Rotate(Quaternion.Euler(0, 90, 0));
+        Vector3 normal = rotMatrix.MultiplyVector(dirXZ) * (thickness * 0.5f);
 
         
         List<Vector3> poly = new List<Vector3>
         {
-            new Vector3(p0.x, p0.y, 0) - normal,
-            new Vector3(p0.x, p0.y, 0) + normal,
-            new Vector3(p1.x, p1.y, 0) + normal,
-            new Vector3(p1.x, p1.y, 0) - normal
+            new Vector3(p0.x, 0f, p0.z) - normal,
+            new Vector3(p0.x, 0f, p0.z) + normal,
+            new Vector3(p1.x, 0f, p1.z) + normal,
+            new Vector3(p1.x, 0f, p1.z) - normal
         };
         
         var wallGo = ModelingUtility.CreateExtrudedPolygon(this.ObjectName, poly, height, this.transform);
