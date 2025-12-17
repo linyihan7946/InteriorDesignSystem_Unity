@@ -52,6 +52,31 @@ public class WallObject : BaseObject
         {
             // 将墙体底部对齐到 centerLine 的 y 位置 (centerLine.startPoint.y)
             wallGo.transform.localPosition = new Vector3(0f, 0f, 0f);
+
+            // 设置墙体材质颜色或替换材质为 ProjectConfig 中的默认材质
+            var cfg = ProjectConfig.Instance;
+            var desiredColor = (cfg != null) ? cfg.wallDefaultColor : new Color(0.8f, 0.8f, 0.8f, 1f);
+            var desiredMat = cfg != null ? cfg.wallMaterial : null;
+            var renderers = wallGo.GetComponentsInChildren<MeshRenderer>();
+            foreach (var r in renderers)
+            {
+                if (desiredMat != null)
+                {
+                    // 使用配置中的材质（赋值会实例化材质以免修改共享材质）
+                    r.material = desiredMat;
+                }
+                else
+                {
+                    // 确保有实例化材质然后设置颜色（兼容 Standard / URP / HDRP 属性名）
+                    var mat = r.material;
+                    if (mat != null)
+                    {
+                        mat.color = desiredColor;
+                        if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", desiredColor);
+                        if (mat.HasProperty("_Color")) mat.SetColor("_Color", desiredColor);
+                    }
+                }
+            }
         }
 
     }
