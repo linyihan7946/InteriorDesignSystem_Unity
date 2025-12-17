@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class WallObject : BaseObject
@@ -12,7 +13,12 @@ public class WallObject : BaseObject
 
     public static WallObject Create(string json = null, string name = null)
     {
-        return CreateFromJson<WallObject>(json, name);
+        WallObject wall = CreateFromJson<WallObject>(json, name);
+        if (wall.contour == null)
+        {
+            wall.contour = new CompositeLine();
+        }
+        return wall;
     }
     
     public override void Rebuild()
@@ -25,17 +31,20 @@ public class WallObject : BaseObject
         var p0 = centerLine.startPoint;
         var p1 = centerLine.endPoint;
         var dir = p1 - p0;
-        var dirXZ = new Vector3(dir.x, 0f, dir.z);
-        if (dirXZ.sqrMagnitude < 1e-6f) return;
-        dirXZ.Normalize();
-        var perp = new Vector3(-dirXZ.z, 0f, dirXZ.x) * (thickness * 0.5f);
+        Vector3 dirXY = new Vector3(dir.x, dir.y, 0f);
+        if (dirXY.sqrMagnitude < 1e-6f) return;
+        dirXY.Normalize();
+
+        Matrix4x4 rotMatrix = Matrix4x4.Rotate(Quaternion.Euler(0, 0, 90));
+        Vector3 normal = rotMatrix.MultiplyVector(dirXY) * (thickness * 0.5f);
+
         
         List<Vector3> poly = new List<Vector3>
         {
-            new Vector3(p0.x + perp.x, p0.y, p0.z + perp.z),
-            new Vector3(p0.x - perp.x, p0.y, p0.z - perp.z),
-            new Vector3(p1.x - perp.x, p1.y, p1.z - perp.z),
-            new Vector3(p1.x + perp.x, p1.y, p1.z + perp.z)
+            new Vector3(p0.x, p0.y, 0) - normal,
+            new Vector3(p0.x, p0.y, 0) + normal,
+            new Vector3(p1.x, p1.y, 0) + normal,
+            new Vector3(p1.x, p1.y, 0) - normal
         };
         
         var wallGo = ModelingUtility.CreateExtrudedPolygon(this.ObjectName, poly, height, this.transform);
