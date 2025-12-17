@@ -77,6 +77,7 @@
     <Compile Include="Assets\Scripts\Object\BaseObject.cs" />
     <Compile Include="Assets\Scripts\Object\SceneObject.cs" />
     <Compile Include="Assets\Scripts\Object\DoorWindowObject.cs" />
+    <Compile Include="Assets\Scripts\MaterialManager.cs" />
     <Compile Include="Assets\Scripts\Object\SegmentObject.cs" />
   </ItemGroup>
   <ItemGroup>
