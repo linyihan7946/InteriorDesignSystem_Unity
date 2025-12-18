@@ -77,6 +77,63 @@ public class BaseObject : MonoBehaviour
     }
     public Matrix4x4 Matrix3D { get => _matrix3D; set => _matrix3D = value; }
 
+    // 将给定 4x4 矩阵应用到本对象的 Transform（可选择作为局部矩阵或世界矩阵）
+    public void ApplyMatrix(Matrix4x4 matrix, bool asLocal = false)
+    {
+        Matrix4x4 localMatrix = matrix;
+        if (!asLocal)
+        {
+            if (transform.parent != null) localMatrix = transform.parent.worldToLocalMatrix * matrix;
+        }
+
+        Vector3 pos = new Vector3(localMatrix.m03, localMatrix.m13, localMatrix.m23);
+        Vector3 col0 = new Vector3(localMatrix.m00, localMatrix.m10, localMatrix.m20);
+        Vector3 col1 = new Vector3(localMatrix.m01, localMatrix.m11, localMatrix.m21);
+        Vector3 col2 = new Vector3(localMatrix.m02, localMatrix.m12, localMatrix.m22);
+
+        Vector3 scale = new Vector3(col0.magnitude, col1.magnitude, col2.magnitude);
+        Quaternion rot = Quaternion.identity;
+        if (scale.x > Mathf.Epsilon && scale.y > Mathf.Epsilon && scale.z > Mathf.Epsilon)
+        {
+            Vector3 forward = col2 / scale.z;
+            Vector3 up = col1 / scale.y;
+            rot = Quaternion.LookRotation(forward, up);
+        }
+
+        transform.localPosition = pos;
+        transform.localRotation = rot;
+        transform.localScale = scale;
+    }
+
+    // 获取本对象的局部 TRS 矩阵
+    public Matrix4x4 GetLocalMatrix()
+    {
+        return Matrix4x4.TRS(transform.localPosition, transform.localRotation, transform.localScale);
+    }
+
+    // 获取本对象的世界矩阵
+    public Matrix4x4 GetWorldMatrix()
+    {
+        return transform.localToWorldMatrix;
+    }
+
+    // 将内部存储的 Matrix2D/Matrix3D 应用到 Transform
+    public void ApplyMatrix2DToTransform(bool asLocal = true)
+    {
+        ApplyMatrix(_matrix2D, asLocal);
+    }
+
+    public void ApplyMatrix3DToTransform(bool asLocal = true)
+    {
+        ApplyMatrix(_matrix3D, asLocal);
+    }
+
+    // 从当前 Transform 更新内部矩阵（把局部 TRS 复制到 Matrix3D，同时把同样的矩阵复制到 Matrix2D）
+    public void UpdateMatricesFromTransform()
+    {
+        _matrix3D = GetLocalMatrix();
+        _matrix2D = _matrix3D;
+    }
     // 为建模/更新提供的入口，派生类应覆写以创建或重建其可视化结构
     public virtual void Rebuild()
     {

@@ -91,8 +91,11 @@ public static class SceneManager
         // 模型
         ModelObject model = ModelObject.Create(null, "AutoCreatedModel");
         model.SetParent(floor);
-        model.gltfUrl = "E:\\linyihan\\资源文件\\gltf\\模型gltf/4cc75d5849f877c6ce4cc4c1eba48bfc.glb";
+        model.fbxPath = "E:\\GitHubWorkSpace\\Tuanjie_Projects\\InteriorDesignSystem_Unity\\Assets\\Models\\test\\t1.fbx";
         model.Rebuild();
+        // 将模型平移到(2000, 0, 2000)
+        model.ApplyMatrix(Matrix4x4.TRS(new Vector3(2000f, 0f, 2000f), Quaternion.identity, Vector3.one));
+
     }
 
     private static WallObject CreateWall(string name, Vector3 start, Vector3 end, float height, float thickness)
