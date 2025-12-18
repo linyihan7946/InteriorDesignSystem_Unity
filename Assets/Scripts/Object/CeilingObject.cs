@@ -1,10 +1,12 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class CeilingObject : BaseObject
 {
     // 天花板类
     public float Elevation = 3.0f; // 世界 Y 高度
-    public Vector2 Size = new Vector2(10f, 10f);
+    // 轮廓：第一个为外圈，其余为内圈（孔）
+    public CompositeLine[] contours;
 
     public CeilingObject(string json = null) : base(json) { }
 
@@ -15,23 +17,50 @@ public class CeilingObject : BaseObject
 
     public override void Rebuild()
     {
-        var existing = transform.Find(this.ObjectName);
+        var name = this.Id;
+        var existing = transform.Find(name);
         if (existing != null) UnityEngine.Object.DestroyImmediate(existing.gameObject);
 
-        var plane = ModelingUtility.CreatePlane(this.ObjectName, Size, 1, 1, this.transform);
-        if (plane != null)
+        // 构建多边形平面：外圈 + 内圈
+        List<Vector3> outer = null;
+        var holes = new List<List<Vector3>>();
+        if (contours != null && contours.Length > 0)
         {
-            plane.transform.localPosition = new Vector3(0f, Elevation, 0f);
-
-            var cfg = ProjectConfig.Instance;
-            Material mat = (cfg != null) ? cfg.defaultMaterial : null;
-            if (mat == null)
+            if (contours[0] != null) outer = contours[0].GetContourPoints();
+            for (int i = 1; i < contours.Length; i++)
             {
-                // create runtime material with white color as default
-                mat = MaterialManager.CreateRuntimeMaterial("CeilingMaterial", null, Color.white);
+                if (contours[i] != null) holes.Add(contours[i].GetContourPoints());
             }
-            var mr = plane.GetComponent<MeshRenderer>();
-            if (mr != null) mr.sharedMaterial = mat;
         }
+
+        GameObject go = null;
+        if (outer != null && outer.Count >= 3)
+        {
+            go = ModelingUtility.CreatePolygonPlaneWithHoles(name, outer, holes.Count>0?holes:null, this.transform, true);
+        }
+        if (go == null) return;
+
+        go.transform.localPosition = new Vector3(0f, Elevation, 0f);
+
+        var cfg = ProjectConfig.Instance;
+        Material mat = (cfg != null) ? cfg.defaultMaterial : null;
+        if (mat == null)
+        {
+            mat = MaterialManager.CreateRuntimeMaterial("CeilingMaterial", null, Color.white);
+        }
+        var mr = go.GetComponent<MeshRenderer>();
+        if (mr != null) mr.sharedMaterial = mat;
+    }
+
+    // 设置轮廓（第一个为外圈，其余为内圈）
+    public void SetContours(CompositeLine[] newContours)
+    {
+        contours = newContours;
+    }
+
+    // 获取当前轮廓数组（可能为 null）
+    public CompositeLine[] GetContours()
+    {
+        return contours;
     }
 }

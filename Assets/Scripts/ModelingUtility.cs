@@ -260,7 +260,7 @@ public static class ModelingUtility
     }
 
     // 支持多个内孔的多边形平面（outer 为外圈，holes 为内圈列表，均为 XZ 平面坐标）
-    public static GameObject CreatePolygonPlaneWithHoles(string name, List<Vector3> outer, List<List<Vector3>> holes, Transform parent = null)
+    public static GameObject CreatePolygonPlaneWithHoles(string name, List<Vector3> outer, List<List<Vector3>> holes, Transform parent = null, bool isFaceDown = false)
     {
         if (outer == null || outer.Count < 3) return null;
 
@@ -320,7 +320,9 @@ public static class ModelingUtility
         var tris = TriangulatePolygon(merged);
         if (tris == null || tris.Count == 0) return null;
 
-        ReverseTriangulateOrder(tris);
+        if (!isFaceDown) {
+            ReverseTriangulateOrder(tris);
+        }
 
         var go = new GameObject(string.IsNullOrEmpty(name) ? "PolygonPlaneWithHoles" : name);
         if (parent != null) go.transform.SetParent(parent, worldPositionStays: true);

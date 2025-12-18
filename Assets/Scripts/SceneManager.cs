@@ -11,6 +11,12 @@ public static class SceneManager
         if (!Application.isPlaying)
             return;
 
+        SceneManager.CreateRectRoom();
+    }
+
+    // 创建一个矩形房间场景
+    private static void CreateRectRoom()
+    {
         // Unity MonoBehaviours must be created via GameObject.AddComponent — use Create helper
         SceneObject scene = SceneObject.Create(null, "AutoCreatedScene");
         FloorObject floor = FloorObject.Create(null, "AutoCreatedFloor");
@@ -73,6 +79,12 @@ public static class SceneManager
         ground.contours = new CompositeLine[] { line };
         ground.SetParent(floor);
         ground.Rebuild();
+        // 天花
+        CeilingObject ceiling = CeilingObject.Create(null, "AutoCreatedCeiling");
+        ceiling.contours = new CompositeLine[] { line };
+        ceiling.Elevation = height;
+        ceiling.SetParent(floor);
+        ceiling.Rebuild();
     }
 
     private static WallObject CreateWall(string name, Vector3 start, Vector3 end, float height, float thickness)
