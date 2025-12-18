@@ -15,9 +15,10 @@ public static class MaterialManager
     // 运行时：创建一个临时材质（不写入磁盘）
     public static Material CreateRuntimeMaterial(string name, Shader shader = null, Color? color = null)
     {
-        if (shader == null) // URP 项目
+        // 要跟当前项目匹配，否则生成出来的材质有各种异常
+        if (shader == null) // HDRP 项目
         {
-            shader = Shader.Find("Universal Render Pipeline/Lit");
+            shader = Shader.Find("HDRP/Lit");
         }
         if (shader == null)// 内置管线项目
         {

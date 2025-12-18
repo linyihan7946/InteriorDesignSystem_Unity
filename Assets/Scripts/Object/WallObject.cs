@@ -52,7 +52,7 @@ public class WallObject : BaseObject
         {
             var wallMaterialName = "WallMaterial";
             var cfg = ProjectConfig.Instance;
-            var desiredColor = new Color(1.0f, 1.0f, 0.0f, 1f);// (cfg != null) ? cfg.wallDefaultColor : new Color(0.8f, 0.8f, 0.8f, 1f);
+            var desiredColor = (cfg != null) ? cfg.wallDefaultColor : new Color(0.8f, 0.8f, 0.8f, 1f);
 
             // prefer material from ProjectConfig if provided
             Material material = (cfg != null) ? cfg.wallMaterial : null;
