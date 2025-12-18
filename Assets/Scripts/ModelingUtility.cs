@@ -320,6 +320,8 @@ public static class ModelingUtility
         var tris = TriangulatePolygon(merged);
         if (tris == null || tris.Count == 0) return null;
 
+        ReverseTriangulateOrder(tris);
+
         var go = new GameObject(string.IsNullOrEmpty(name) ? "PolygonPlaneWithHoles" : name);
         if (parent != null) go.transform.SetParent(parent, worldPositionStays: true);
         var mesh = new Mesh();
@@ -393,6 +395,17 @@ public static class ModelingUtility
         return inside;
     }
 
+    // 反转三角形顶点顺序（CW <-> CCW）
+    public static void ReverseTriangulateOrder(List<int> tris)
+    {
+        for (int i = 0; i < tris.Count; i += 3)
+        {
+            int temp = tris[i + 1];
+            tris[i + 1] = tris[i + 2];
+            tris[i + 2] = temp;
+        }
+    }
+
     // 将多边形沿 Y 轴拉伸为实体（棱柱），返回包含网格的 GameObject
     public static GameObject CreateExtrudedPolygon(string name, List<Vector3> polygon, float height, Transform parent = null)
     {
@@ -459,20 +472,33 @@ public static class ModelingUtility
     {
         int n = poly.Count;
         if (n < 3) return null;
+        // 处理闭合（首尾相同）情况，并建立从工作点到原始索引的映射
+        var pts = new List<Vector2>();
+        var indexMap = new List<int>();
+        for (int i = 0; i < n; i++)
+        {
+            // 如果最后一个点等于第一个点（闭合环），则忽略最后一个重复点
+            if (i == n - 1)
+            {
+                if (Mathf.Approximately(poly[i].x, poly[0].x) && Mathf.Approximately(poly[i].z, poly[0].z))
+                    break;
+            }
+            pts.Add(new Vector2(poly[i].x, poly[i].z));
+            indexMap.Add(i);
+        }
 
-        // 投影到 2D (x,y)
-        var pts = new List<Vector2>(n);
-        for (int i = 0; i < n; i++) pts.Add(new Vector2(poly[i].x, poly[i].z));
-
-        // 计算方向，确保为 CCW
-        if (SignedArea(pts) < 0) pts.Reverse();
+        int m = pts.Count;
+        if (m < 3) return null;
 
         var indices = new List<int>();
         var V = new List<int>();
-        for (int i = 0; i < n; i++) V.Add(i);
+        for (int i = 0; i < m; i++) V.Add(i);
+
+        // 计算方向（signed area），确保为 CCW 顶点序列
+        if (SignedArea(pts) < 0f) V.Reverse();
 
         int guard = 0;
-        while (V.Count > 2 && guard < n * n)
+        while (V.Count > 2 && guard < m * m)
         {
             bool earFound = false;
             for (int i = 0; i < V.Count; i++)
@@ -499,10 +525,10 @@ public static class ModelingUtility
                 }
                 if (hasPointInside) continue;
 
-                // ear
-                indices.Add(prev);
-                indices.Add(curr);
-                indices.Add(next);
+                // ear -> 输出为原始多边形索引
+                indices.Add(indexMap[prev]);
+                indices.Add(indexMap[curr]);
+                indices.Add(indexMap[next]);
                 V.RemoveAt(i);
                 earFound = true;
                 break;

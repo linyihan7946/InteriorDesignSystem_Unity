@@ -6,6 +6,7 @@ public class GroundObject : BaseObject
 {
     // 地面类：在 XZ 平面创建大平面并添加 MeshCollider
     // 轮廓：第一个为外圈，其余为内圈（孔）
+    // 顺逆时针都可以
     public CompositeLine[] contours;
     public float Elevation = 0f; // Y
     public bool AddCollider = true;

@@ -63,9 +63,9 @@ public static class SceneManager
         List<Vector3> pts = new List<Vector3>
         {
             new Vector3(0f, 0f, 0f),
-            new Vector3(0f, 0f, 4000f),
-            new Vector3(6000f, 0f, 4000f),
             new Vector3(6000f, 0f, 0f),
+            new Vector3(6000f, 0f, 4000f),
+            new Vector3(0f, 0f, 4000f),
             new Vector3(0f, 0f, 0f),
         };
         line.SetContourPoints(pts);
