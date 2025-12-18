@@ -77,7 +77,6 @@
     <Compile Include="Assets\Scripts\CreateCubeOnPlay.cs" />
     <Compile Include="Assets\Scripts\ProjectConfig.cs" />
     <Compile Include="Assets\Scripts\Object\BaseObject.cs" />
-    <Compile Include="Assets\Scripts\RegionSearcher.cs" />
     <Compile Include="Assets\Scripts\Object\SceneObject.cs" />
     <Compile Include="Assets\Scripts\Object\DoorWindowObject.cs" />
     <Compile Include="Assets\Scripts\MaterialManager.cs" />

@@ -10,16 +10,18 @@ public static class RegionSearcher_Clipper
 {
     private const double CLIPPER_SCALE = 1000.0;
 
-    public static List<List<Vector3>> SearchRoomsByPolygons(List<List<Vector3>> obstacles, float minRoomArea = 0.5f)
+    public static List<CompositeLine> SearchRoomsByPolygons(List<CompositeLine> obstacles, float minRoomArea = 0.5f)
     {
-        var result = new List<List<Vector3>>();
+        var result = new List<CompositeLine>();
         if (obstacles == null) return result;
 
         // compute bounds
         float minX = float.MaxValue, minZ = float.MaxValue, maxX = float.MinValue, maxZ = float.MinValue;
         bool any = false;
-        foreach (var p in obstacles)
+        foreach (var comp in obstacles)
         {
+            if (comp == null) continue;
+            var p = comp.GetContourPoints();
             if (p == null) continue;
             foreach (var v in p)
             {
@@ -39,8 +41,10 @@ public static class RegionSearcher_Clipper
         minX -= pad; minZ -= pad; maxX += pad; maxZ += pad;
 
         var clip = new List<List<IntPoint>>();
-        foreach (var poly in obstacles)
+        foreach (var comp in obstacles)
         {
+            if (comp == null) continue;
+            var poly = comp.GetContourPoints();
             if (poly == null || poly.Count < 3) continue;
             var path = new List<IntPoint>();
             foreach (var v in poly)
@@ -66,13 +70,28 @@ public static class RegionSearcher_Clipper
         var sol = new List<List<IntPoint>>();
         c.Execute(ClipType.ctDifference, sol, PolyFillType.pftNonZero, PolyFillType.pftNonZero);
 
+        int roomIdx = 0;
         foreach (var path in sol)
         {
             var poly = IntPathToVector3(path);
             if (poly == null || poly.Count < 3) continue;
             float area = Mathf.Abs(PolygonAreaXZ(poly));
             if (area < minRoomArea) continue;
-            result.Add(poly);
+
+            // convert polygon to CompositeLine
+            var room = CompositeLine.Create(null, "Room_" + roomIdx);
+            room.SetContourPoints(poly, true);
+            // ensure segment gameobjects are parented under the composite line
+            if (room.segments != null)
+            {
+                foreach (var seg in room.segments)
+                {
+                    if (seg != null && seg.transform.parent != room.transform)
+                        seg.transform.SetParent(room.transform, worldPositionStays: true);
+                }
+            }
+            roomIdx++;
+            result.Add(room);
         }
 
         return result;
