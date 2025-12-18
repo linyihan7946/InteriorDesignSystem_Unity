@@ -39,7 +39,6 @@ public static class GeometryUtils
             s /= Mathf.Max(1, n);
             return From2D(s, poly.Count>0?poly[0].y:0f);
         }
-        float factor = 0f;
         for (int i = 0; i < n; i++)
         {
             Vector2 p0 = To2D(poly[i]);

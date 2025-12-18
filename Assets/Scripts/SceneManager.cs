@@ -64,6 +64,7 @@ public static class SceneManager
             wall.SetParent(floor);
             wall.Rebuild();
         }
+        
         // 地板
         CompositeLine line = CompositeLine.Create(null, "GroundContour");
         List<Vector3> pts = new List<Vector3>
@@ -79,12 +80,19 @@ public static class SceneManager
         ground.contours = new CompositeLine[] { line };
         ground.SetParent(floor);
         ground.Rebuild();
+        
         // 天花
         CeilingObject ceiling = CeilingObject.Create(null, "AutoCreatedCeiling");
         ceiling.contours = new CompositeLine[] { line };
         ceiling.Elevation = height;
         ceiling.SetParent(floor);
         ceiling.Rebuild();
+        
+        // 模型
+        ModelObject model = ModelObject.Create(null, "AutoCreatedModel");
+        model.SetParent(floor);
+        model.gltfUrl = "E:\\linyihan\\资源文件\\gltf\\模型gltf/4cc75d5849f877c6ce4cc4c1eba48bfc.glb";
+        model.Rebuild();
     }
 
     private static WallObject CreateWall(string name, Vector3 start, Vector3 end, float height, float thickness)
