@@ -69,6 +69,7 @@
     <Compile Include="Assets\Scripts\Object\CompositeLine.cs" />
     <Compile Include="Assets\Scripts\GeometryUtils.cs" />
     <Compile Include="Assets\Scripts\ModelingUtility.cs" />
+    <Compile Include="Assets\Scripts\Object\CeilingObject.cs" />
     <Compile Include="Assets\Scripts\SceneManager.cs" />
     <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
     <Compile Include="Assets\Scripts\Object\FloorObject.cs" />
@@ -78,6 +79,7 @@
     <Compile Include="Assets\Scripts\Object\SceneObject.cs" />
     <Compile Include="Assets\Scripts\Object\DoorWindowObject.cs" />
     <Compile Include="Assets\Scripts\MaterialManager.cs" />
+    <Compile Include="Assets\Scripts\Object\GroundObject.cs" />
     <Compile Include="Assets\Scripts\Object\SegmentObject.cs" />
   </ItemGroup>
   <ItemGroup>

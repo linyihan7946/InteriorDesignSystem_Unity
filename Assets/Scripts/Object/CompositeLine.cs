@@ -22,19 +22,8 @@ public class CompositeLine : BaseObject
     // 设置轮廓点集（按点顺序生成首尾相连的段），在运行时使用 Destroy，编辑器使用 DestroyImmediate
     public void SetContourPoints(List<Vector3> points, bool closed = true)
     {
-        // 清空已有段（删除子 GameObject）
-        var toRemove = new List<GameObject>();
-        foreach (Transform t in transform)
-        {
-            toRemove.Add(t.gameObject);
-        }
         if (segments == null) segments = new List<SegmentObject>();
         segments.Clear();
-        foreach (var g in toRemove)
-        {
-            if (Application.isPlaying) UnityEngine.Object.Destroy(g);
-            else UnityEngine.Object.DestroyImmediate(g);
-        }
 
         if (points == null || points.Count < 2) return;
         int count = points.Count;
@@ -43,9 +32,11 @@ public class CompositeLine : BaseObject
         {
             var a = points[i];
             var b = points[(i + 1) % count];
-            var segGo = new GameObject($"Segment_{i}");
-            segGo.transform.SetParent(this.transform, worldPositionStays: true);
-            var seg = segGo.AddComponent<SegmentObject>();
+            // 计算a跟b的距离
+            float distance = Vector3.Distance(a, b);
+            if (distance < 0.001f) continue; // 跳过过近的点
+
+            var seg = SegmentObject.Create();
             seg.startPoint = a;
             seg.endPoint = b;
             segments.Add(seg);

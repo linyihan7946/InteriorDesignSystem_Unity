@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public static class SceneManager
@@ -18,68 +19,74 @@ public static class SceneManager
         float thickness = ProjectConfig.Instance.wallDefaultThickness;
         float height = ProjectConfig.Instance.wallDefaultHeight;
         {// 左
-            WallObject wall = WallObject.Create(null, "Wall_Left"); // 左
-            wall.ObjectName = wall.Id;
-            Vector3 start = new Vector3(0f, 0f, 0f);
-            Vector3 end = new Vector3(0f, 0f, 4000f);
-            wall.height = height;
-            wall.thickness = thickness;
-            wall.centerLine = SegmentObject.Create(null, "CenterLine_Left");
-            wall.centerLine.startPoint = start;
-            wall.centerLine.endPoint = end;
-            wall.contour = CompositeLine.Create(null, "Contour_Left");
-            List<Vector3> pts = GeometryUtils.CreateThickSegmentPolygon(start, end, thickness);
-            wall.contour.SetContourPoints(pts);
+            WallObject wall = SceneManager.CreateWall("Wall_Left",
+                new Vector3(0f, 0f, 0f),
+                new Vector3(0f, 0f, 4000f),
+                height,
+                thickness
+            );
             wall.SetParent(floor);
             wall.Rebuild();
         }
         {// 右
-            WallObject wall = WallObject.Create(null, "Wall_Right");
-            wall.ObjectName = wall.Id;
-            Vector3 start = new Vector3(6000f, 0f, 0f);
-            Vector3 end = new Vector3(6000f, 0f, 4000f);
-            wall.height = height;
-            wall.thickness = thickness;
-            wall.centerLine = SegmentObject.Create(null, "CenterLine_Right");
-            wall.centerLine.startPoint = start;
-            wall.centerLine.endPoint = end;
-            wall.contour = CompositeLine.Create(null, "Contour_Right");
-            List<Vector3> pts = GeometryUtils.CreateThickSegmentPolygon(start, end, thickness);
-            wall.contour.SetContourPoints(pts);
+            WallObject wall = SceneManager.CreateWall("Wall_Right",
+                new Vector3(6000f, 0f, 0f),
+                new Vector3(6000f, 0f, 4000f),
+                height,
+                thickness
+            );
             wall.SetParent(floor);
             wall.Rebuild();
         }
         {// 上
-            WallObject wall = WallObject.Create(null, "Wall_Top");// 上
-            wall.ObjectName = wall.Id;
-            Vector3 start = new Vector3(0f, 0f, 4000f);
-            Vector3 end = new Vector3(6000f, 0f, 4000f);
-            wall.height = height;
-            wall.thickness = thickness;
-            wall.centerLine = SegmentObject.Create(null, "CenterLine_Top");
-            wall.centerLine.startPoint = start;
-            wall.centerLine.endPoint = end;
-            wall.contour = CompositeLine.Create(null, "Contour_Top");
-            List<Vector3> pts = GeometryUtils.CreateThickSegmentPolygon(start, end, thickness);
-            wall.contour.SetContourPoints(pts);
+            WallObject wall = SceneManager.CreateWall("Wall_Top",
+                new Vector3(0f, 0f, 4000f),
+                new Vector3(6000f, 0f, 4000f),
+                height,
+                thickness
+            );
             wall.SetParent(floor);
             wall.Rebuild();
         }
         {// 下
-            WallObject wall = WallObject.Create(null, "Wall_Bottom");// 下
-            wall.ObjectName = wall.Id;
-            Vector3 start = new Vector3(0f, 0f, 0f);
-            Vector3 end = new Vector3(6000f, 0f, 0f);
-            wall.height = height;
-            wall.thickness = thickness;
-            wall.centerLine = SegmentObject.Create(null, "CenterLine_Bottom");
-            wall.centerLine.startPoint = start;
-            wall.centerLine.endPoint = end;
-            wall.contour = CompositeLine.Create(null, "Contour_Bottom");
-            List<Vector3> pts = GeometryUtils.CreateThickSegmentPolygon(start, end, thickness);
-            wall.contour.SetContourPoints(pts);
+            WallObject wall = SceneManager.CreateWall("Wall_Bottom",
+                new Vector3(0f, 0f, 0f),
+                new Vector3(6000f, 0f, 0f),
+                height,
+                thickness
+            );
             wall.SetParent(floor);
             wall.Rebuild();
         }
+        // 地板
+        CompositeLine line = CompositeLine.Create(null, "GroundContour");
+        List<Vector3> pts = new List<Vector3>
+        {
+            new Vector3(0f, 0f, 0f),
+            new Vector3(0f, 0f, 4000f),
+            new Vector3(6000f, 0f, 4000f),
+            new Vector3(6000f, 0f, 0f),
+            new Vector3(0f, 0f, 0f),
+        };
+        line.SetContourPoints(pts);
+        GroundObject ground = GroundObject.Create(null, "AutoCreatedGround");
+        ground.contours = new CompositeLine[] { line };
+        ground.SetParent(floor);
+        ground.Rebuild();
+    }
+
+    private static WallObject CreateWall(string name, Vector3 start, Vector3 end, float height, float thickness)
+    {
+        WallObject wall = WallObject.Create(null, name);
+        wall.ObjectName = wall.Id;
+        wall.height = height;
+        wall.thickness = thickness;
+        wall.centerLine = SegmentObject.Create(null, "CenterLine_" + name);
+        wall.centerLine.startPoint = start;
+        wall.centerLine.endPoint = end;
+        wall.contour = CompositeLine.Create(null, "Contour_" + name);
+        List<Vector3> pts = GeometryUtils.CreateThickSegmentPolygon(start, end, thickness);
+        wall.contour.SetContourPoints(pts);
+        return wall;
     }
 }
