@@ -449,7 +449,7 @@ public static class ModelingUtility
         var mf = go.AddComponent<MeshFilter>();
         mf.sharedMesh = mesh;
         var mr = go.AddComponent<MeshRenderer>();
-        mr.sharedMaterial = GetDefaultMaterial();
+        // mr.sharedMaterial = GetDefaultMaterial();
 
         return go;
     }

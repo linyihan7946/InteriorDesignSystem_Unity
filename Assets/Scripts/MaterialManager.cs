@@ -15,7 +15,14 @@ public static class MaterialManager
     // 运行时：创建一个临时材质（不写入磁盘）
     public static Material CreateRuntimeMaterial(string name, Shader shader = null, Color? color = null)
     {
-        if (shader == null) shader = Shader.Find("Standard");
+        if (shader == null) // URP 项目
+        {
+            shader = Shader.Find("Universal Render Pipeline/Lit");
+        }
+        if (shader == null)// 内置管线项目
+        {
+            shader = Shader.Find("Standard");
+        }
         var mat = new Material(shader)
         {
             name = string.IsNullOrEmpty(name) ? "RuntimeMaterial" : name
@@ -85,83 +92,4 @@ public static class MaterialManager
         foreach (var m in all) if (m.name == name) return m;
         return null;
     }
-
-#if UNITY_EDITOR
-    // 编辑器：创建材质资产（path: "Assets/.../name.mat"）
-    public static Material CreateMaterialAsset(string assetPath, Shader shader = null, Color? color = null)
-    {
-        if (string.IsNullOrEmpty(assetPath)) return null;
-        if (shader == null) shader = Shader.Find("Standard");
-        var mat = new Material(shader) { name = System.IO.Path.GetFileNameWithoutExtension(assetPath) };
-        if (color.HasValue) SetMaterialColor(mat, color.Value);
-        // Ensure directory exists
-        var dir = System.IO.Path.GetDirectoryName(assetPath);
-        if (!string.IsNullOrEmpty(dir) && !AssetDatabase.IsValidFolder(dir))
-        {
-            // create folders recursively
-            var parts = dir.Split('/');
-            string cur = parts[0];
-            for (int i = 1; i < parts.Length; i++)
-            {
-                var next = cur + "/" + parts[i];
-                if (!AssetDatabase.IsValidFolder(next)) AssetDatabase.CreateFolder(cur, parts[i]);
-                cur = next;
-            }
-        }
-        AssetDatabase.CreateAsset(mat, assetPath);
-        AssetDatabase.SaveAssets();
-        AssetDatabase.Refresh();
-        return AssetDatabase.LoadAssetAtPath<Material>(assetPath);
-    }
-
-    // 编辑器：根据名称查找工程内材质资产（返回路径列表或 Material 列表）
-    public static List<string> FindMaterialAssetPathsByName(string name)
-    {
-        var paths = new List<string>();
-        if (string.IsNullOrEmpty(name)) return paths;
-        var guids = AssetDatabase.FindAssets("t:Material " + name);
-        foreach (var g in guids)
-        {
-            var p = AssetDatabase.GUIDToAssetPath(g);
-            var m = AssetDatabase.LoadAssetAtPath<Material>(p);
-            if (m != null && m.name == name) paths.Add(p);
-        }
-        return paths;
-    }
-
-    public static List<Material> FindMaterialAssetsByName(string name)
-    {
-        var list = new List<Material>();
-        var paths = FindMaterialAssetPathsByName(name);
-        foreach (var p in paths) list.Add(AssetDatabase.LoadAssetAtPath<Material>(p));
-        return list;
-    }
-
-    // 编辑器：删除材质资产（返回是否成功）
-    public static bool DeleteMaterialAsset(string assetPath)
-    {
-        if (string.IsNullOrEmpty(assetPath)) return false;
-        return AssetDatabase.DeleteAsset(assetPath);
-    }
-
-    // 编辑器：列出工程内所有材质资产路径
-    public static List<string> ListAllMaterialAssetPaths()
-    {
-        var list = new List<string>();
-        var guids = AssetDatabase.FindAssets("t:Material");
-        foreach (var g in guids) list.Add(AssetDatabase.GUIDToAssetPath(g));
-        return list;
-    }
-
-    // 编辑器：将运行时材质保存为资产
-    public static Material SaveMaterialToAsset(Material mat, string assetPath)
-    {
-        if (mat == null || string.IsNullOrEmpty(assetPath)) return null;
-        var copy = new Material(mat) { name = System.IO.Path.GetFileNameWithoutExtension(assetPath) };
-        AssetDatabase.CreateAsset(copy, assetPath);
-        AssetDatabase.SaveAssets();
-        AssetDatabase.Refresh();
-        return AssetDatabase.LoadAssetAtPath<Material>(assetPath);
-    }
-#endif
 }
