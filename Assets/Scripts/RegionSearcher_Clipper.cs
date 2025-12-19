@@ -82,12 +82,12 @@ public static class RegionSearcher_Clipper
     }
 
     // --- 辅助递归函数 ---
-    private static void ProcessPolyNodes(List<PolyNode> nodes, ref int idx, float minArea, List<CompositeLine> resList)
+    private static void ProcessPolyNodes(List<PolyNode> nodes, ref int idx, float minArea, List<CompositeLine> resList, int layerIndex = 0)
     {
         foreach (var node in nodes)
         {
             // 只有非孔洞（IsHole == false）的节点才是我们要的“房间面积”
-            if (!node.IsHole)
+            if (!node.IsHole && layerIndex != 0)
             {
                 var poly = IntPathToVector3(node.Contour);
                 if (poly != null && poly.Count >= 3)
@@ -111,7 +111,7 @@ public static class RegionSearcher_Clipper
             // 内墙的子节点则可能是“房中房”
             if (node.ChildCount > 0)
             {
-                ProcessPolyNodes(node.Childs, ref idx, minArea, resList);
+                ProcessPolyNodes(node.Childs, ref idx, minArea, resList, layerIndex + 1);
             }
         }
     }

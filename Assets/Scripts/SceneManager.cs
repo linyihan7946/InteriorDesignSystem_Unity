@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -26,6 +27,8 @@ public static class SceneManager
         float thickness = ProjectConfig.Instance.wallDefaultThickness;
         float height = ProjectConfig.Instance.wallDefaultHeight;
         List<CompositeLine> compositeLines = new List<CompositeLine>();
+        List<CompositeLine> compositeLines1 = new List<CompositeLine>();
+        List<List<CompositeLine>> compositeLines2 = new List<List<CompositeLine>>();
         {// 左
             WallObject wall = SceneManager.CreateWall("Wall_Left",
                 new Vector3(0f, 0f, 0f),
@@ -36,6 +39,7 @@ public static class SceneManager
             wall.SetParent(floor);
             wall.Rebuild();
             compositeLines.Add(wall.contour);
+            compositeLines1.Add(wall.contour);
         }
         {// 右
             WallObject wall = SceneManager.CreateWall("Wall_Right",
@@ -47,6 +51,7 @@ public static class SceneManager
             wall.SetParent(floor);
             wall.Rebuild();
             compositeLines.Add(wall.contour);
+            compositeLines2.Add(new List<CompositeLine>() { wall.contour });
         }
         {// 上
             WallObject wall = SceneManager.CreateWall("Wall_Top",
@@ -58,6 +63,7 @@ public static class SceneManager
             wall.SetParent(floor);
             wall.Rebuild();
             compositeLines.Add(wall.contour);
+            compositeLines2.Add(new List<CompositeLine>() { wall.contour });
         }
         {// 下
             WallObject wall = SceneManager.CreateWall("Wall_Bottom",
@@ -69,30 +75,30 @@ public static class SceneManager
             wall.SetParent(floor);
             wall.Rebuild();
             compositeLines.Add(wall.contour);
+            compositeLines2.Add(new List<CompositeLine>() { wall.contour });
         }
 
-
+        
+        var result1 = ClipperBooleanOperations.BooleanOperation(compositeLines1, compositeLines2, ClipperLib.ClipType.ctUnion);
+        compositeLines.Clear();
+        for (int i = 0; i < result1.Count; i++)
+        {
+            for (int j = 0; j < result1[i].Count; j++)
+            {
+                compositeLines.Add(result1[i][j]);
+            }
+        }
         var result = RegionSearcher_Clipper.SearchRoomsByPolygons(compositeLines);
         
         // 地板
-        CompositeLine line = CompositeLine.Create(null, "GroundContour");
-        List<Vector3> pts = new List<Vector3>
-        {
-            new Vector3(0f, 0f, 0f),
-            new Vector3(6000f, 0f, 0f),
-            new Vector3(6000f, 0f, 4000f),
-            new Vector3(0f, 0f, 4000f),
-            new Vector3(0f, 0f, 0f),
-        };
-        line.SetContourPoints(pts);
         GroundObject ground = GroundObject.Create(null, "AutoCreatedGround");
-        ground.contours = new CompositeLine[] { line };
+        ground.contours = result.ToArray();
         ground.SetParent(floor);
         ground.Rebuild();
         
         // 天花
         CeilingObject ceiling = CeilingObject.Create(null, "AutoCreatedCeiling");
-        ceiling.contours = new CompositeLine[] { line };
+        ceiling.contours = result.ToArray();
         ceiling.Elevation = height;
         ceiling.SetParent(floor);
         ceiling.Rebuild();

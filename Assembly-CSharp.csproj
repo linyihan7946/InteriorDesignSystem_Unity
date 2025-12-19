@@ -77,6 +77,7 @@
     <Compile Include="Assets\Scripts\CreateCubeOnPlay.cs" />
     <Compile Include="Assets\Scripts\ProjectConfig.cs" />
     <Compile Include="Assets\Scripts\Object\BaseObject.cs" />
+    <Compile Include="Assets\Scripts\ClipperBooleanOperations.cs" />
     <Compile Include="Assets\Scripts\clipper.cs" />
     <Compile Include="Assets\Scripts\Object\SceneObject.cs" />
     <Compile Include="Assets\Scripts\Object\DoorWindowObject.cs" />
