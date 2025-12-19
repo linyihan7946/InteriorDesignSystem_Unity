@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Drawing;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -24,6 +25,7 @@ public static class SceneManager
         // 生成墙体
         float thickness = ProjectConfig.Instance.wallDefaultThickness;
         float height = ProjectConfig.Instance.wallDefaultHeight;
+        List<CompositeLine> compositeLines = new List<CompositeLine>();
         {// 左
             WallObject wall = SceneManager.CreateWall("Wall_Left",
                 new Vector3(0f, 0f, 0f),
@@ -33,6 +35,7 @@ public static class SceneManager
             );
             wall.SetParent(floor);
             wall.Rebuild();
+            compositeLines.Add(wall.contour);
         }
         {// 右
             WallObject wall = SceneManager.CreateWall("Wall_Right",
@@ -43,6 +46,7 @@ public static class SceneManager
             );
             wall.SetParent(floor);
             wall.Rebuild();
+            compositeLines.Add(wall.contour);
         }
         {// 上
             WallObject wall = SceneManager.CreateWall("Wall_Top",
@@ -53,6 +57,7 @@ public static class SceneManager
             );
             wall.SetParent(floor);
             wall.Rebuild();
+            compositeLines.Add(wall.contour);
         }
         {// 下
             WallObject wall = SceneManager.CreateWall("Wall_Bottom",
@@ -63,7 +68,11 @@ public static class SceneManager
             );
             wall.SetParent(floor);
             wall.Rebuild();
+            compositeLines.Add(wall.contour);
         }
+
+
+        var result = RegionSearcher_Clipper.SearchRoomsByPolygons(compositeLines);
         
         // 地板
         CompositeLine line = CompositeLine.Create(null, "GroundContour");

@@ -64,13 +64,19 @@ public static class GeometryUtils
         Vector2 a2 = a - normal * half;
         // 使用 Y 作为高度
         float y = (p1.y + p2.y) * 0.5f;
-        return new List<Vector3>
+        var result = new List<Vector3>
         {
             From2D(a1, y),
             From2D(b1, y),
             From2D(b2, y),
             From2D(a2, y)
         };
+        // 对result逆时针排列
+        if (IsClockwise(result))
+        {
+            result.Reverse();
+        }
+        return result;
     }
 
     // 对闭合多边形进行偏移（外缩/扩展）。正值朝外，负值朝内。

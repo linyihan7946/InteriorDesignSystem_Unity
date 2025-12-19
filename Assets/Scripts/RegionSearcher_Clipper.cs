@@ -1,4 +1,3 @@
-#if CLIPPER_EXISTS
 using System.Collections.Generic;
 using UnityEngine;
 using ClipperLib;
@@ -10,7 +9,7 @@ public static class RegionSearcher_Clipper
 {
     private const double CLIPPER_SCALE = 1000.0;
 
-    public static List<CompositeLine> SearchRoomsByPolygons(List<CompositeLine> obstacles, float minRoomArea = 0.5f)
+    public static List<CompositeLine> SearchRoomsByPolygons(List<CompositeLine> obstacles, float minRoomArea = 1.0E6f)
     {
         var result = new List<CompositeLine>();
         if (obstacles == null) return result;
@@ -40,6 +39,7 @@ public static class RegionSearcher_Clipper
         float pad = Mathf.Max(5f, Mathf.Max(maxX - minX, maxZ - minZ));
         minX -= pad; minZ -= pad; maxX += pad; maxZ += pad;
 
+
         var clip = new List<List<IntPoint>>();
         foreach (var comp in obstacles)
         {
@@ -56,6 +56,7 @@ public static class RegionSearcher_Clipper
             clip.Add(path);
         }
 
+        // 构造包络框
         var env = new List<IntPoint>
         {
             new IntPoint((long)System.Math.Round(minX * CLIPPER_SCALE), (long)System.Math.Round(minZ * CLIPPER_SCALE)),
@@ -67,34 +68,52 @@ public static class RegionSearcher_Clipper
         var c = new Clipper();
         c.AddPath(env, PolyType.ptSubject, true);
         foreach (var p in clip) c.AddPath(p, PolyType.ptClip, true);
-        var sol = new List<List<IntPoint>>();
-        c.Execute(ClipType.ctDifference, sol, PolyFillType.pftNonZero, PolyFillType.pftNonZero);
+        // var sol = new List<List<IntPoint>>();
+        // c.Execute(ClipType.ctDifference, sol, PolyFillType.pftNonZero, PolyFillType.pftNonZero);
+        // 1. 修改执行部分：使用 PolyTree 替代 List<List<IntPoint>>
+        var polyTree = new PolyTree();
+        c.Execute(ClipType.ctDifference, polyTree, PolyFillType.pftEvenOdd, PolyFillType.pftEvenOdd);
 
+        // 2. 递归处理节点
         int roomIdx = 0;
-        foreach (var path in sol)
-        {
-            var poly = IntPathToVector3(path);
-            if (poly == null || poly.Count < 3) continue;
-            float area = Mathf.Abs(PolygonAreaXZ(poly));
-            if (area < minRoomArea) continue;
-
-            // convert polygon to CompositeLine
-            var room = CompositeLine.Create(null, "Room_" + roomIdx);
-            room.SetContourPoints(poly, true);
-            // ensure segment gameobjects are parented under the composite line
-            if (room.segments != null)
-            {
-                foreach (var seg in room.segments)
-                {
-                    if (seg != null && seg.transform.parent != room.transform)
-                        seg.transform.SetParent(room.transform, worldPositionStays: true);
-                }
-            }
-            roomIdx++;
-            result.Add(room);
-        }
+        ProcessPolyNodes(polyTree.Childs, ref roomIdx, minRoomArea, result);
 
         return result;
+    }
+
+    // --- 辅助递归函数 ---
+    private static void ProcessPolyNodes(List<PolyNode> nodes, ref int idx, float minArea, List<CompositeLine> resList)
+    {
+        foreach (var node in nodes)
+        {
+            // 只有非孔洞（IsHole == false）的节点才是我们要的“房间面积”
+            if (!node.IsHole)
+            {
+                var poly = IntPathToVector3(node.Contour);
+                if (poly != null && poly.Count >= 3)
+                {
+                    float area = Mathf.Abs(PolygonAreaXZ(poly));
+                    if (area >= minArea)
+                    {
+                        // 创建房间对象
+                        var room = CompositeLine.Create(null, "Room_" + idx);
+                        room.SetContourPoints(poly, true);
+                        // ... (保持原有的父子层级设置代码)
+                        
+                        resList.Add(room);
+                        idx++;
+                    }
+                }
+            }
+
+            // 关键：递归处理子节点
+            // 如果当前节点是房间，它的子节点可能是“内墙”
+            // 内墙的子节点则可能是“房中房”
+            if (node.ChildCount > 0)
+            {
+                ProcessPolyNodes(node.Childs, ref idx, minArea, resList);
+            }
+        }
     }
 
     private static List<Vector3> IntPathToVector3(List<IntPoint> path)
@@ -123,4 +142,3 @@ public static class RegionSearcher_Clipper
         return 0.5f * a;
     }
 }
-#endif
